@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EcoRoute: AI Carbon Leak Detector — E-Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --sage: #7a9e7e;
+    --sage-light: #a8c5ac;
+    --sage-pale: #d4e6d6;
+    --forest: #2d5a35;
+    --forest-deep: #1a3a20;
+    --cream: #faf7f2;
+    --warm-white: #f5f0e8;
+    --sand: #e8dfc8;
+    --terracotta: #b5673c;
+    --terracotta-light: #d4845a;
+    --charcoal: #2c2c2c;
+    --mid: #555;
+    --light-text: #888;
+    --card-bg: #ffffff;
+    --border: #e0d8cc;
+    --section-pad: 90px 60px;
+  }
+ 
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+  html { scroll-behavior: smooth; }
+ 
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    overflow-x: hidden;
+  }
+ 
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(250,247,242,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 40px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--forest);
+    letter-spacing: 0.02em;
+  }
+  .nav-logo span { color: var(--terracotta); }
+  .nav-links {
+    display: flex; gap: 28px; list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none; font-size: 0.82rem; font-weight: 500;
+    color: var(--mid); letter-spacing: 0.05em; text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--forest); }
+ 
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    background: linear-gradient(145deg, var(--forest-deep) 0%, var(--forest) 55%, #3d7a48 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    padding: 120px 60px 80px;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(122,158,126,0.25) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 10% 80%, rgba(181,103,60,0.15) 0%, transparent 55%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0; opacity: 0.04;
+    background-image: linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-content {
+    position: relative; z-index: 1;
+    max-width: 900px; text-align: center;
+    animation: fadeUp 1s ease both;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(122,158,126,0.3);
+    border: 1px solid rgba(168,197,172,0.5);
+    color: var(--sage-pale);
+    font-size: 0.75rem; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 6px 18px; border-radius: 100px;
+    margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 700; line-height: 1.1;
+    color: #fff; margin-bottom: 12px;
+  }
+  .hero h1 em {
+    font-style: italic; color: var(--sage-light);
+  }
+  .hero-subtitle {
+    font-size: 1.05rem; color: rgba(255,255,255,0.65);
+    font-weight: 300; margin-bottom: 48px; letter-spacing: 0.02em;
+  }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;
+    margin-bottom: 52px;
+  }
+  .hero-meta-item {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px; padding: 14px 24px;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.85rem; line-height: 1.5;
+  }
+  .hero-meta-item strong {
+    display: block; font-weight: 600;
+    color: var(--sage-light); font-size: 0.72rem;
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px;
+  }
+  .team-chips {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+  }
+  .chip {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 100px; padding: 8px 20px;
+    color: #fff; font-size: 0.85rem; font-weight: 500;
+  }
+  .hero-scroll {
+    position: absolute; bottom: 36px; left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.4); font-size: 0.75rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    animation: bounce 2s infinite;
+  }
+  .hero-scroll::after {
+    content: '↓'; font-size: 1.2rem;
+  }
+ 
+  /* ── SECTIONS ── */
+  section {
+    padding: var(--section-pad);
+    max-width: 1100px; margin: 0 auto;
+  }
+  .section-label {
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--terracotta); margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 700; line-height: 1.2;
+    color: var(--forest-deep); margin-bottom: 36px;
+  }
+  .section-divider {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, var(--sage-pale), transparent);
+    margin-bottom: 60px;
+  }
+ 
+  /* ── ABSTRACT CARD ── */
+  .abstract-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 44px 48px;
+    box-shadow: 0 4px 30px rgba(45,90,53,0.06);
+    position: relative; overflow: hidden;
+  }
+  .abstract-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: linear-gradient(to bottom, var(--sage), var(--terracotta));
+  }
+  .abstract-card p {
+    font-size: 1.05rem; line-height: 1.85; color: var(--mid);
+  }
+  .objectives-list {
+    list-style: none; display: grid; gap: 14px;
+    margin-top: 28px;
+  }
+  .objectives-list li {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px;
+    font-size: 0.95rem; line-height: 1.6; color: var(--mid);
+  }
+  .objectives-list li::before {
+    content: attr(data-n);
+    min-width: 28px; height: 28px;
+    background: var(--forest);
+    color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .tools-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 16px;
+    margin-top: 28px;
+  }
+  .tool-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px 18px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .tool-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(45,90,53,0.1); }
+  .tool-icon { font-size: 2rem; margin-bottom: 10px; }
+  .tool-card p { font-size: 0.85rem; font-weight: 500; color: var(--mid); }
+ 
+  /* ── PROBLEM ── */
+  .problem-wrapper {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+  }
+  .info-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px; padding: 32px 30px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+  }
+  .info-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; color: var(--forest);
+    margin-bottom: 14px; font-weight: 600;
+  }
+  .info-card p, .info-card li {
+    font-size: 0.92rem; line-height: 1.8; color: var(--mid);
+  }
+  .info-card ul { list-style: none; }
+  .info-card ul li::before { content: '→ '; color: var(--terracotta); }
+  .reflection-box {
+    background: linear-gradient(135deg, #f0f7f1, #faf7f2);
+    border: 1px solid var(--sage-pale);
+    border-radius: 18px; padding: 32px 30px;
+    margin-top: 28px;
+    grid-column: 1 / -1;
+  }
+  .reflection-box .r-label {
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--sage); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .reflection-box .r-label::before { content: '✦'; }
+  .reflection-box p {
+    font-size: 0.93rem; line-height: 1.8; color: var(--mid);
+    font-style: italic;
+  }
+ 
+  /* ── LITERATURE TABLE ── */
+  .lit-table-wrap {
+    overflow-x: auto;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+  }
+  table {
+    width: 100%; border-collapse: collapse;
+    background: var(--card-bg);
+    font-size: 0.875rem;
+  }
+  thead {
+    background: linear-gradient(135deg, var(--forest), #3d7a48);
+  }
+  thead th {
+    color: #fff; font-weight: 600;
+    padding: 16px 18px; text-align: left;
+    font-size: 0.8rem; letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:hover { background: var(--warm-white); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td {
+    padding: 16px 18px; vertical-align: top;
+    color: var(--mid); line-height: 1.65;
+  }
+  tbody td:first-child {
+    font-weight: 700; color: var(--forest);
+    text-align: center;
+  }
+  .tag-lim {
+    display: inline-block;
+    background: #fdf0e8; border: 1px solid #f0c8a8;
+    color: var(--terracotta); border-radius: 6px;
+    font-size: 0.78rem; padding: 3px 10px;
+    font-weight: 500;
+  }
+ 
+  /* ── RESEARCH GAP ── */
+  .gap-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 20px;
+  }
+  .gap-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px 26px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .gap-card::after {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--sage), var(--terracotta-light));
+  }
+  .gap-card:hover { transform: translateY(-4px); box-shadow: 0 14px 35px rgba(45,90,53,0.1); }
+  .gap-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; color: var(--forest);
+    margin-bottom: 10px; font-weight: 600;
+  }
+  .gap-card p { font-size: 0.88rem; line-height: 1.75; color: var(--mid); }
+ 
+  /* ── PROPOSED SOLUTION ── */
+  .solution-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 28px;
+  }
+  .blackbox {
+    background: var(--forest-deep);
+    border-radius: 20px; padding: 36px 32px;
+    color: #fff; text-align: center;
+  }
+  .blackbox h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; margin-bottom: 24px;
+    color: var(--sage-light);
+  }
+  .flow-diagram {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .flow-box {
+    background: rgba(122,158,126,0.25);
+    border: 1px solid rgba(168,197,172,0.4);
+    border-radius: 10px; padding: 12px 24px;
+    font-size: 0.85rem; color: rgba(255,255,255,0.9);
+    width: 100%; text-align: center; font-weight: 500;
+  }
+  .flow-arrow { color: var(--sage-light); font-size: 1.2rem; }
+ 
+  /* ── METHODOLOGY ── */
+  .method-steps {
+    display: grid; gap: 20px;
+  }
+  .method-step {
+    display: flex; gap: 24px; align-items: flex-start;
+  }
+  .step-num {
+    min-width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--forest), var(--sage));
+    color: #fff; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; font-weight: 700; flex-shrink: 0;
+  }
+  .step-body h4 {
+    font-weight: 600; font-size: 1rem;
+    color: var(--forest); margin-bottom: 6px;
+  }
+  .step-body p { font-size: 0.91rem; line-height: 1.75; color: var(--mid); }
+ 
+  /* ── OVERALL REFLECTION ── */
+  .reflection-full {
+    background: linear-gradient(135deg, var(--forest-deep) 0%, var(--forest) 100%);
+    border-radius: 24px; padding: 52px 52px;
+    color: #fff; position: relative; overflow: hidden;
+  }
+  .reflection-full::before {
+    content: '❝';
+    position: absolute; top: 24px; right: 40px;
+    font-family: 'Playfair Display', serif;
+    font-size: 8rem; color: rgba(255,255,255,0.05);
+    line-height: 1;
+  }
+  .reflection-full .section-label { color: var(--sage-light); }
+  .reflection-full .section-title { color: #fff; margin-bottom: 32px; }
+  .reflection-full p {
+    font-size: 1rem; line-height: 1.9; color: rgba(255,255,255,0.78);
+    font-style: italic; margin-bottom: 18px;
+  }
+  .reflection-full p:last-child { margin-bottom: 0; }
+ 
+  /* ── FOOTER ── */
+  footer {
+    background: var(--forest-deep);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 36px 40px;
+    font-size: 0.82rem; line-height: 1.8;
+  }
+  footer strong { color: rgba(255,255,255,0.8); }
+ 
+  /* ── ALTERNATING BG ── */
+  .bg-alt { background: var(--warm-white); }
+ 
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%       { transform: translateX(-50%) translateY(6px); }
+  }
+ 
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    :root { --section-pad: 60px 24px; }
+    nav { padding: 12px 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 70px; }
+    .problem-wrapper, .solution-grid { grid-template-columns: 1fr; }
+    .reflection-full { padding: 36px 28px; }
+    .method-step { flex-direction: column; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+ 
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Eco<span>Route</span></div>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#objectives">Objectives</a></li>
+    <li><a href="#literature">Literature</a></li>
+    <li><a href="#gap">Research Gap</a></li>
+    <li><a href="#solution">Solution</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ul>
+</nav>
+ 
+<!-- HERO / HOME -->
+<div id="home" class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Phase 1 · E-Portfolio · 2025–26</div>
+    <h1><em>EcoRoute:</em><br>AI Carbon Leak Detector</h1>
+    <p class="hero-subtitle">Electronics & Communication Engineering &nbsp;·&nbsp; BITM, Ballari (Autonomous — VTU, Belagavi)</p>
+ 
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <strong>Department</strong>
+        Electronics & Communication Engineering
+      </div>
+      <div class="hero-meta-item">
+        <strong>Institution</strong>
+        BITM, Ballari (Autonomous — VTU)
+      </div>
+      <div class="hero-meta-item">
+        <strong>Project Coordinator</strong>
+        Dr. Naseeruddin
+      </div>
+      <div class="hero-meta-item">
+        <strong>Guide</strong>
+        Dr. Abdul Lateef Haroon P S<br>Associate Professor
+      </div>
+    </div>
+ 
+    <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:16px;">Team Members</p>
+    <div class="team-chips">
+      <span class="chip">Sayeeda Zaiba</span>
+      <span class="chip">Nazia Firdouse</span>
+      <span class="chip">Rafiya Banu</span>
+      <span class="chip">Tahiya Tarannum</span>
+    </div>
+  </div>
+  <div class="hero-scroll">Scroll</div>
+</div>
+ 
+<!-- ABSTRACT & OVERVIEW -->
+<section id="overview" style="padding-top:80px;">
+  <p class="section-label">01 · Overview</p>
+  <h2 class="section-title">Project Abstract & Broad Objectives</h2>
+  <div class="abstract-card">
+    <p>
+      <strong>EcoRoute: AI Carbon Leak Detector</strong> is a smart, AI-powered system designed to detect, monitor, and minimise carbon emissions from vehicles and logistics operations in real time. As global concern over climate change grows, the need for intelligent, scalable solutions that can address vehicular carbon footprint has never been more urgent. This project combines the power of Artificial Intelligence, sensor-based data collection, and route optimisation algorithms to identify high-emission "leaks" in transportation networks and suggest eco-friendly alternatives. The system aims to serve urban planners, fleet managers, and individual users alike, bridging the gap between cutting-edge AI research and practical, real-world sustainability solutions.
+    </p>
+    <ul class="objectives-list" style="margin-top:32px;">
+      <li data-n="1">Develop an AI-based system capable of monitoring and detecting CO₂ and other vehicular emissions in real time using sensor data and machine learning models.</li>
+      <li data-n="2">Implement intelligent eco-routing algorithms that suggest optimised, low-emission paths for vehicles, reducing the overall carbon footprint of journeys.</li>
+      <li data-n="3">Build a scalable and accessible monitoring dashboard that visualises emission levels, route comparisons, and historical trends for decision-making.</li>
+      <li data-n="4">Identify and flag "carbon leak" hotspots — specific routes, intersections, or behaviours that contribute disproportionately to emissions.</li>
+      <li data-n="5">Evaluate the system's effectiveness in reducing predicted carbon emissions against baseline models and prior literature benchmarks.</li>
+    </ul>
+  </div>
+</section>
+ 
+<div class="section-divider" style="max-width:1100px;margin:0 auto;"></div>
+ 
+<!-- PROBLEM STATEMENT -->
+<div class="bg-alt">
+<section id="problem">
+  <p class="section-label">02 · Problem Statement</p>
+  <h2 class="section-title">Understanding the Problem</h2>
+  <div class="problem-wrapper">
+    <div class="info-card">
+      <h3>General Description</h3>
+      <p>Transportation is one of the largest contributors to global greenhouse gas emissions. Despite the availability of navigation apps, most route planning tools optimise only for time or distance — completely ignoring the carbon cost of each route. Vehicles idling at congestion hotspots, inefficient routing, and lack of real-time emission feedback create invisible "carbon leaks" in our everyday mobility. There exists a pressing need for a system that can intelligently detect, quantify, and reduce these leaks using AI and real-time data.</p>
+    </div>
+    <div class="info-card">
+      <h3>Importance & Context</h3>
+      <ul>
+        <li>Road transport accounts for nearly 16% of global CO₂ emissions</li>
+        <li>Most existing solutions are either hardware-heavy or limited to offline analysis</li>
+        <li>AI-driven eco-routing can reduce emissions by 10–20% on average</li>
+        <li>Smart cities and sustainable logistics demand real-time carbon intelligence</li>
+        <li>No unified platform currently integrates detection + routing + visualisation</li>
+      </ul>
+    </div>
+    <div class="reflection-box">
+      <div class="r-label">Our Reflection</div>
+      <p>Our interest in this problem was sparked during a discussion about how map applications like Google Maps show traffic but never carbon impact. We began to wonder — what if a navigation system could think ecologically? As we discussed this with our guide Dr. Abdul Lateef Haroon P S , our framing evolved from a vague "green routing idea" to a focused challenge: building a system that detects where emissions are highest and intelligently reroutes traffic. Inputs from the PRC helped us understand the importance of quantifiability — the system must not just sense, but measure and act.</p>
+    </div>
+  </div>
+</section>
+</div>
+ 
+<div class="section-divider" style="max-width:1100px;margin:0 auto;"></div>
+ 
+<!-- OBJECTIVES -->
+<section id="objectives">
+  <p class="section-label">03 · Objectives</p>
+  <h2 class="section-title">Refined Project Objectives</h2>
+  <div class="abstract-card">
+    <p>Our objectives were refined iteratively across multiple sessions with our project guide and PRC committee. What began as broad sustainability goals were sharpened into the following measurable, technically grounded objectives:</p>
+    <ul class="objectives-list">
+      <li data-n="1">Design and simulate a real-time CO₂ emission monitoring module using IoT sensor data or equivalent software-based proxies, integrated with vehicle speed and location data.</li>
+      <li data-n="2">Implement and compare AI/ML models — including regression, classification, and reinforcement learning approaches — to predict emission levels and recommend optimal routes.</li>
+      <li data-n="3">Develop an eco-routing engine capable of dynamically adjusting suggested paths based on live traffic and emission predictions.</li>
+      <li data-n="4">Create a user-facing dashboard or interface to visualise emission data, route comparisons, and carbon savings in an intuitive way.</li>
+      <li data-n="5">Validate the system performance using benchmark datasets and compare against existing eco-routing literature.</li>
+    </ul>
+    <div class="reflection-box" style="margin-top:28px;border-radius:12px;">
+      <div class="r-label">How Objectives Evolved</div>
+      <p>Initially, our objectives were broad — "reduce carbon emissions using AI." Through guidance from Dr. Abdul Lateef Haroon P S, we learned to frame measurable goals. The PRC review pushed us to distinguish between monitoring (detecting leaks) and acting (rerouting), which led us to split our objective into detection and routing sub-goals. We also moved from a purely hardware approach to a hybrid software-simulation approach, making the project more feasible within our timeline.</p>
+    </div>
+  </div>
+</section>
+ 
+<div class="section-divider" style="max-width:1100px;margin:0 auto;"></div>
+ 
+<!-- LITERATURE SURVEY -->
+<div class="bg-alt">
+<section id="literature">
+  <p class="section-label">04 · Literature Survey</p>
+  <h2 class="section-title">Review of Existing Research</h2>
+  <div class="lit-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Sl. No</th>
+          <th>Title</th>
+          <th>Author(s)</th>
+          <th>Year</th>
+          <th>Methodology</th>
+          <th>Limitations</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>IoT-based Vehicle CO₂ Emission Monitoring using CACC</td>
+          <td>M. Smith, J. Lee</td>
+          <td>2020</td>
+          <td>Uses IoT sensors, GPS, and CACC to monitor and optimise vehicle speed for reducing emissions</td>
+          <td><span class="tag-lim">Requires hardware setup, limited scalability</span></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Eco-Routing for Reducing Vehicle Emissions</td>
+          <td>A. Kumar, R. Singh</td>
+          <td>2021</td>
+          <td>Route optimisation using traffic and emission models (IVE model)</td>
+          <td><span class="tag-lim">Accuracy depends on real-time data availability</span></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>eco2AI for AI Energy Consumption Tracking</td>
+          <td>S. Budennyy et al.</td>
+          <td>2022</td>
+          <td>Tracks energy usage and CO₂ emissions of AI models using software-based monitoring</td>
+          <td><span class="tag-lim">Focuses only on AI models, not real-world routing</span></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Towards Sustainable AI: Monitoring and Analysis of Carbon Emissions in Machine Learning Algorithms</td>
+          <td>Aurora Martiny</td>
+          <td>2023</td>
+          <td>Uses ML models and tools like CodeCarbon to analyse and reduce energy consumption during training by optimising parameters</td>
+          <td><span class="tag-lim">Requires high computational resources; focuses mainly on training phase, not real-time applications</span></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Artificial Intelligence for Sustainable Logistics: Reducing Carbon Emissions and Fuel Consumption through Route Optimisation</td>
+          <td>Orcun Sarioguz</td>
+          <td>2025</td>
+          <td>Uses AI-based optimisation techniques (Machine Learning, ACO, and Genetic Algorithms) to analyse and optimise logistics routes through simulation</td>
+          <td><span class="tag-lim">Requires high infrastructure and real-time data; difficult to implement in small-scale or developing environments</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="reflection-box" style="margin-top:28px;">
+    <div class="r-label">Our Reflection on the Literature</div>
+    <p>Reviewing this body of research revealed a consistent theme: existing solutions are either hardware-intensive (IoT sensor networks) or narrowly focused (AI energy tracking without routing). A clear trend emerged toward AI-based route optimisation, but no single study unifies real-time emission detection with intelligent eco-routing in a lightweight, scalable architecture. The gap that stood out most was the absence of a platform that bridges the "detect" and "redirect" phases of carbon management — which directly informed our proposed solution. We also noticed that most studies were validated in developed-world contexts, ignoring constraints in developing or semi-urban environments.</p>
+  </div>
+</section>
+</div>
+ 
+<div class="section-divider" style="max-width:1100px;margin:0 auto;"></div>
+ 
+<!-- RESEARCH GAP -->
+<section id="gap">
+  <p class="section-label">05 · Research Gap Identification</p>
+  <h2 class="section-title">Where Existing Work Falls Short</h2>
+  <div class="gap-grid">
+    <div class="gap-card">
+      <h3>🔌 Hardware Dependency</h3>
+      <p>Most emission monitoring systems require dedicated physical IoT hardware, limiting deployment scalability and accessibility in resource-constrained environments.</p>
+    </div>
+    <div class="gap-card">
+      <h3>🔄 Disconnected Pipelines</h3>
+      <p>Detection and rerouting are treated as separate problems. No unified system currently integrates carbon leak identification with real-time eco-routing in a single loop.</p>
+    </div>
+    <div class="gap-card">
+      <h3>📊 Lack of Real-Time Intelligence</h3>
+      <p>Many approaches rely on offline batch analysis or historical datasets. A gap exists for systems that adapt dynamically to live traffic and emission data simultaneously.</p>
+    </div>
+    <div class="gap-card">
+      <h3>🌍 Context Gaps</h3>
+      <p>Solutions are validated primarily in developed urban contexts. Semi-urban and developing-region road networks — with irregular traffic behaviour — remain largely unaddressed.</p>
+    </div>
+    <div class="gap-card">
+      <h3>👤 User Accessibility</h3>
+      <p>Existing tools are oriented toward researchers and fleet operators. A gap exists for lightweight, user-friendly interfaces that empower individual drivers to make eco-conscious decisions.</p>
+    </div>
+    <div class="gap-card">
+      <h3>🤖 AI Model Scope</h3>
+      <p>AI in prior work is applied either to emission tracking or to route optimisation — rarely both. A combined ML framework addressing the full carbon-detection-to-action pipeline is missing.</p>
+    </div>
+  </div>
+  <div class="reflection-box" style="margin-top:28px;">
+    <div class="r-label">Gap vs. Limitation — Our Understanding</div>
+    <p>A key insight from our literature review was learning to differentiate a "gap" from a "limitation." A limitation is a constraint inherent to a specific study (e.g., "requires high computational resources"), while a gap is an unaddressed need in the broader research landscape. For instance, the fact that no existing system integrates real-time detection with rerouting in a single lightweight platform is a gap — not tied to any one paper's limitations, but an opportunity in the field as a whole. This distinction helped us articulate where our contribution genuinely sits.</p>
+  </div>
+</section>
+ 
+<div class="section-divider" style="max-width:1100px;margin:0 auto;"></div>
+ 
+<!-- PROPOSED SOLUTION -->
+<div class="bg-alt">
+<section id="solution">
+  <p class="section-label">06 · Proposed Solution</p>
+  <h2 class="section-title">Conceptual Framework (Black-Box View)</h2>
+  <div class="solution-grid">
+    <div class="blackbox">
+      <h3>EcoRoute System — Black Box</h3>
+      <div class="flow-diagram">
+        <div class="flow-box">📡 Input: Vehicle Data, GPS, Traffic Feeds</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box">🧠 AI Emission Detection Engine</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box">🗺️ Eco-Routing Optimisation Module</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box">📊 Carbon Leak Dashboard & Alerts</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box">✅ Output: Optimised Route + Emission Report</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div class="info-card">
+        <h3>High-Level Explanation</h3>
+        <p>The EcoRoute system takes in real-time or simulated vehicle and traffic data, processes it through an AI model to quantify emissions, identifies "carbon leak" zones, and outputs an eco-optimised route recommendation. The system operates as a closed loop — continuously learning and adjusting as new data flows in.</p>
+      </div>
+      <div class="info-card">
+        <h3>What Influenced Our Idea</h3>
+        <p>The concept emerged from combining two observations: (1) navigation apps know where traffic is but not its carbon cost, and (2) AI models in logistics can optimise for fuel but rarely for real-time CO₂. Our guide encouraged us to think in terms of systems integration, which shaped our black-box architecture.</p>
+      </div>
+    </div>
+  </div>
+  <div class="reflection-box" style="margin-top:8px;">
+    <div class="r-label">Alternatives We Considered & Rejected</div>
+    <p>We initially considered a purely hardware-based solution using physical CO₂ sensors mounted on vehicles. While accurate, this approach was cost-prohibitive and difficult to scale. We also considered a mobile app-only solution, but this lacked the processing capacity for real-time ML inference. Our final approach balances software simulation with AI inference, keeping the system deployable without specialised hardware — a direction reinforced through discussion with Dr. Abdul Lateef Haroon P S.</p>
+  </div>
+</section>
+</div>
+ 
+<div class="section-divider" style="max-width:1100px;margin:0 auto;"></div>
+ 
+<!-- METHODOLOGY -->
+<section id="methodology">
+  <p class="section-label">07 · Methodology</p>
+  <h2 class="section-title">Conceptual Approach — High-Level Steps</h2>
+  <div class="method-steps">
+    <div class="method-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>Data Collection & Preprocessing</h4>
+        <p>Gather vehicle emission datasets, GPS trajectory data, and traffic flow information from public repositories and simulation tools. Clean, normalise, and structure the data for ML model training.</p>
+      </div>
+    </div>
+    <div class="method-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Emission Prediction Modelling</h4>
+        <p>Train and evaluate AI/ML models (regression, neural networks) to predict CO₂ emissions based on vehicle speed, route type, and traffic density. Identify high-emission zones algorithmically.</p>
+      </div>
+    </div>
+    <div class="method-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>Eco-Routing Algorithm Development</h4>
+        <p>Develop or adapt a routing algorithm (e.g., A*, Dijkstra with emission weights, or reinforcement learning) to compute the lowest-emission path between any two points given real-time constraints.</p>
+      </div>
+    </div>
+    <div class="method-step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h4>System Integration & Dashboard</h4>
+        <p>Integrate emission detection and routing modules into a unified pipeline. Build a visualisation dashboard to display routes, emission comparisons, and carbon savings for the end user.</p>
+      </div>
+    </div>
+    <div class="method-step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h4>Testing, Evaluation & Benchmarking</h4>
+        <p>Test the system against benchmark datasets and compare results with existing methods from literature. Measure emission reduction percentages and routing accuracy as key performance indicators.</p>
+      </div>
+    </div>
+  </div>
+  <div class="reflection-box" style="margin-top:32px;">
+    <div class="r-label">Challenges & Mentor Involvement</div>
+    <p>Structuring the methodology was initially difficult because we were unsure how to sequence the detection and routing components — were they parallel or sequential? Dr. Abdul Lateef Haroon P S helped us understand that detection must precede routing in each cycle, making the pipeline sequential. The PRC also highlighted that we needed to define our evaluation metrics upfront, rather than treating them as an afterthought. This guidance was crucial in giving our methodology a clear, defensible structure.</p>
+  </div>
+</section>
+ 
+<div class="section-divider" style="max-width:1100px;margin:0 auto;"></div>
+ 
+<!-- TOOLS & TECHNOLOGIES -->
+<div class="bg-alt">
+<section id="tools">
+  <p class="section-label">08 · Tools & Technologies</p>
+  <h2 class="section-title">Technologies We Are Working With</h2>
+  <div class="tools-grid">
+    <div class="tool-card"><div class="tool-icon">🐍</div><p>Python (ML & Data Processing)</p></div>
+    <div class="tool-card"><div class="tool-icon">🤖</div><p>Scikit-learn / TensorFlow (AI Models)</p></div>
+    <div class="tool-card"><div class="tool-icon">🗺️</div><p>OpenStreetMap / OSRM (Routing)</p></div>
+    <div class="tool-card"><div class="tool-icon">📡</div><p>IoT Sensor Simulation (Emission Data)</p></div>
+    <div class="tool-card"><div class="tool-icon">📊</div><p>Matplotlib / Plotly (Visualisation)</p></div>
+    <div class="tool-card"><div class="tool-icon">🗃️</div><p>Pandas / NumPy (Data Handling)</p></div>
+    <div class="tool-card"><div class="tool-icon">🌐</div><p>Flask / Streamlit (Dashboard)</p></div>
+    <div class="tool-card"><div class="tool-icon">☁️</div><p>GitHub (Version Control & Collaboration)</p></div>
+  </div>
+  <div class="reflection-box" style="margin-top:28px;">
+    <div class="r-label">Skills We Are Building</div>
+    <p>Phase 1 has been a significant learning experience for our team. We have begun developing proficiency in Python-based machine learning pipelines, an area most of us were new to as ECE students. We are also learning how to work with geospatial data and routing APIs, which require a different mindset than typical signal-processing tasks. Beyond technical skills, we have grown in our ability to read academic literature critically, structure a research argument, and collaborate effectively as a team — skills that will serve us well beyond this project.</p>
+  </div>
+</section>
+</div>
+ 
+<div class="section-divider" style="max-width:1100px;margin:0 auto;"></div>
+ 
+<!-- OVERALL REFLECTION -->
+<section id="reflection" style="padding-bottom:60px;">
+  <div class="reflection-full">
+    <p class="section-label">09 · Overall Reflection</p>
+    <h2 class="section-title">Our Phase 1 Journey</h2>
+    <p>Phase 1 of EcoRoute has been a formative experience for all of us. When we first came together as a team, the idea of building an AI-powered carbon emission detector felt ambitious — almost overwhelming. What started as an informal conversation about eco-friendly navigation gradually evolved, through structured meetings with our guide and coordinator, into a well-defined research problem with measurable goals and a clear conceptual framework.</p>
+    <p>The continuous evaluation process kept us accountable and on track. Each PRC session challenged us to go deeper — to not just present ideas, but to justify them with evidence from literature and a logical flow of reasoning. This pressure, though demanding, significantly improved the quality of our thinking and our work. We learned that a good project is not built in a rush, but through constant refinement and honest self-assessment.</p>
+    <p>In terms of schedule, we maintained a steady pace, completing the literature survey, gap analysis, and conceptual framework within the Phase 1 timeline. There were moments of confusion — especially around differentiating the research gap from individual paper limitations — but guidance from Dr. Abdul Lateef Haroon P S and Dr. Naseeruddin helped us resolve these conceptual blocks.</p>
+    <p>Reflecting on the quality of our work, we believe Phase 1 has produced a strong intellectual foundation. We are proud of the clarity of our problem statement, the depth of our literature review, and the coherence of our proposed conceptual framework. As we move into Phase 2, we carry with us not just a project plan, but a deeper respect for the rigour that research demands.</p>
+  </div>
+</section>
+ 
+<!-- FOOTER -->
+<footer>
+  <strong>EcoRoute: AI Carbon Leak Detector</strong><br>
+  Department of Electronics & Communication Engineering &nbsp;·&nbsp; BITM, Ballari (Autonomous — VTU, Belagavi)<br>
+  Team: Sayeeda Zaiba · Nazia Firdouse · Rafiya Banu · Tahiya Tarannum<br>
+  Guide: Dr. Abdul Lateef Haroon P S &nbsp;·&nbsp; Coordinator: Dr. Naseeruddin<br>
+  <span style="opacity:0.4;font-size:0.75rem;margin-top:10px;display:block;">Project Phase 1 · 2025–26 · E-Portfolio</span>
+</footer>
+ 
+</body>
+</html>
+ 
